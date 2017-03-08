@@ -75,7 +75,6 @@ func (client *Client) GetTags(url, model string) (*Tags, error) {
 	tagReq := TaggingRequest{inputs}
 
 	body, err := json.Marshal(tagReq)
-
 	if err != nil {
 		return nil, errors.New("Error during marhaling the response due " + err.Error())
 	}
@@ -125,7 +124,6 @@ func (client *Client) Feedback(form FeedbackForm) (error) {
 
 	response := new(FeedbackResponse)
 	err = json.Unmarshal(result, response)
-
 	if err != nil {
 		return err
 	}
@@ -135,5 +133,4 @@ func (client *Client) Feedback(form FeedbackForm) (error) {
 	}
 
 	return nil
-
 }

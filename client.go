@@ -27,7 +27,6 @@ const (
 type ClientConfig struct {
 	id             string
 	secret         string
-	apiRoot        string
 	basicAuthToken string
 }
 
@@ -38,17 +37,16 @@ type Client struct {
 
 func NewClient(clientID, clientSecret string) *Client {
 	basicAuthToken := base64.StdEncoding.EncodeToString([]byte(clientID + ":" + clientSecret))
-	config := ClientConfig{clientID, clientSecret, rootURLv2, basicAuthToken}
+	config := ClientConfig{clientID, clientSecret, basicAuthToken}
 	client := new(Client)
 	client.config.Store(config)
 	return client
 }
 
-func (client *Client) SetConfig(id, secret, apiRoot string) {
+func (client *Client) SetConfig(id, secret string) {
 	config := client.config.Load().(ClientConfig)
 	config.id = id
 	config.secret = secret
-	config.apiRoot = apiRoot
 	config.basicAuthToken = base64.StdEncoding.EncodeToString([]byte(id + ":" + secret))
 	client.config.Store(config)
 }
@@ -114,7 +112,6 @@ func (client *Client) requestAccessToken() error {
 	formData := strings.NewReader(form.Encode())
 
 	req, err := http.NewRequest("POST", rootURLv2 + "token", formData)
-
 	if err != nil {
 		return err
 	}
@@ -125,7 +122,6 @@ func (client *Client) requestAccessToken() error {
 
 	httpClient := &http.Client{}
 	res, err := httpClient.Do(req)
-
 	if err != nil {
 		return err
 	}
@@ -133,18 +129,17 @@ func (client *Client) requestAccessToken() error {
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
-
 	if err != nil {
 		return err
 	}
 
 	token := TokenResponse{}
 	err = json.Unmarshal(body, &token)
-
 	if err != nil {
 		return err
 	}
 
 	client.accessToken.Store(token)
+
 	return nil
 }
