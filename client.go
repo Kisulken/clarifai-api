@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"errors"
 	"bytes"
+	"time"
 )
 
 const (
@@ -33,6 +34,8 @@ type ClientConfig struct {
 type Client struct {
 	config	    atomic.Value
 	accessToken atomic.Value
+	http	    *http.Client
+	transport   *http.Transport
 }
 
 func NewClient(clientID, clientSecret string) *Client {
@@ -40,6 +43,12 @@ func NewClient(clientID, clientSecret string) *Client {
 	config := ClientConfig{clientID, clientSecret, basicAuthToken}
 	client := new(Client)
 	client.config.Store(config)
+	client.transport = &http.Transport{
+		MaxIdleConns: 10,
+		IdleConnTimeout: 20 * time.Second,
+		DisableCompression: true,
+	}
+	client.http = &http.Client{Transport: client.transport}
 	return client
 }
 
@@ -49,6 +58,11 @@ func (client *Client) SetConfig(id, secret string) {
 	config.secret = secret
 	config.basicAuthToken = base64.StdEncoding.EncodeToString([]byte(id + ":" + secret))
 	client.config.Store(config)
+}
+
+func (client *Client) SetTransport(transport *http.Transport) {
+	client.transport = transport
+	client.http.Transport = transport
 }
 
 func (client *Client) CustomRequest(root, endpoint, method string, body []byte) ([]byte, error) {
@@ -74,8 +88,7 @@ func (client *Client) CustomRequest(root, endpoint, method string, body []byte) 
 	req.Header.Set("Authorization", "Bearer " + token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 
-	httpClient := &http.Client{}
-	res, err := httpClient.Do(req)
+	res, err := client.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
