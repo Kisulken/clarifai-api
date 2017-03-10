@@ -35,7 +35,6 @@ type Client struct {
 	config	    atomic.Value
 	accessToken atomic.Value
 	http	    *http.Client
-	transport   *http.Transport
 }
 
 func NewClient(clientID, clientSecret string) *Client {
@@ -43,12 +42,12 @@ func NewClient(clientID, clientSecret string) *Client {
 	config := ClientConfig{clientID, clientSecret, basicAuthToken}
 	client := new(Client)
 	client.config.Store(config)
-	client.transport = &http.Transport{
+	transport := &http.Transport{
 		MaxIdleConns: 10,
 		IdleConnTimeout: 20 * time.Second,
 		DisableCompression: true,
 	}
-	client.http = &http.Client{Transport: client.transport}
+	client.http = &http.Client{Transport: transport}
 	return client
 }
 
@@ -61,7 +60,6 @@ func (client *Client) SetConfig(id, secret string) {
 }
 
 func (client *Client) SetTransport(transport *http.Transport) {
-	client.transport = transport
 	client.http.Transport = transport
 }
 
@@ -133,8 +131,7 @@ func (client *Client) requestAccessToken() error {
 	req.Header.Set("Content-Length", strconv.Itoa(len(form.Encode())))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	httpClient := &http.Client{}
-	res, err := httpClient.Do(req)
+	res, err := client.http.Do(req)
 	if err != nil {
 		return err
 	}
