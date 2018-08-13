@@ -1,7 +1,12 @@
 # clarifai-api
 Client which provides basic functionality of clarifai.com API.
 
-Example
+## Installation
+```bash
+go get github.com/Kisulken/clarifai-api
+```
+
+## Example
 ```Go
 import (
 	clarifai "clarifai-api"
