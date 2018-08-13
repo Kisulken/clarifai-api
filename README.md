@@ -1,5 +1,5 @@
 # clarifai-api
-Client which provides basic functionality of clarifai.com API.
+Client that provides basic functionality of clarifai.com API.
 
 ## Installation
 ```bash
