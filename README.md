@@ -3,7 +3,7 @@ Client that provides basic functionality of clarifai.com API.
 
 ## Installation
 ```bash
-go get github.com/Kisulken/clarifai-api
+go get github.com/kisulken/clarifai-api
 ```
 
 ## Example
